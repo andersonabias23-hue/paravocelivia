@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f3ed">
+  <meta name="description" content="Um questionário carinhoso para conhecer os sonhos e desejos da Lívia.">
+  <title>Uma conversa com a Lívia</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f3ed;
+      --card: #fffdfa;
+      --ink: #292a27;
+      --muted: #77766f;
+      --accent: #ad6459;
+      --accent-dark: #8e4b43;
+      --accent-soft: #f4e9e3;
+      --line: #e9e1d7;
+      --green: #697664;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 38px 18px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 9% 12%, rgba(216, 190, 166, .28), transparent 31rem),
+        radial-gradient(ellipse at 93% 89%, rgba(194, 153, 137, .2), transparent 30rem),
+        var(--paper);
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+    }
+
+    button, textarea { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .page { width: min(100%, 680px); animation: arrive .55s ease both; }
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin: 0 0 16px;
+      color: var(--accent-dark);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .19em;
+      text-transform: uppercase;
+    }
+    .topline::before, .topline::after {
+      width: 25px;
+      height: 1px;
+      background: #d8b8aa;
+      content: "";
+    }
+
+    h1, h2, p { margin-top: 0; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h1 {
+      margin-bottom: 12px;
+      font-size: clamp(2.55rem, 8vw, 4.65rem);
+      letter-spacing: -.055em;
+      line-height: 1.03;
+      text-align: center;
+    }
+    .intro {
+      max-width: 470px;
+      margin: 0 auto 30px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.75;
+      text-align: center;
+      text-wrap: pretty;
+    }
+
+    .card {
+      overflow: hidden;
+      border: 1px solid rgba(233, 225, 215, .95);
+      border-radius: 23px;
+      background: rgba(255, 253, 250, .94);
+      box-shadow: 0 24px 70px rgba(67, 55, 45, .09), 0 3px 11px rgba(67, 55, 45, .035);
+    }
+    .progress-wrap { padding: 23px 30px 0; }
+    .progress-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: .75rem;
+    }
+    .progress-meta strong { color: var(--accent-dark); font-weight: 650; }
+    .progress-track {
+      height: 4px;
+      overflow: hidden;
+      border-radius: 5px;
+      background: #eee8df;
+    }
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #c88572, var(--accent));
+      transition: width .3s ease;
+    }
+
+    .quiz-body { min-height: 360px; padding: 27px 30px 29px; }
+    .question-kicker {
+      margin-bottom: 11px;
+      color: var(--accent-dark);
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin-bottom: 8px;
+      font-size: clamp(1.7rem, 5vw, 2.2rem);
+      letter-spacing: -.025em;
+      line-height: 1.2;
+      text-wrap: pretty;
+    }
+    .hint { margin-bottom: 21px; color: var(--muted); font-size: .9rem; line-height: 1.6; }
+
+    .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .option {
+      min-height: 55px;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fffefa;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .17s ease, background .17s ease, transform .17s ease, box-shadow .17s ease;
+    }
+    .option:hover { transform: translateY(-1px); border-color: #d9b7aa; }
+    .option[aria-pressed="true"] {
+      border-color: #bd8070;
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px rgba(173, 100, 89, .1);
+    }
+    .option:focus-visible, .nav-button:focus-visible, .text-answer:focus-visible {
+      outline: 3px solid rgba(173, 100, 89, .3);
+      outline-offset: 3px;
+    }
+    .optional-note {
+      margin: 17px 0 0;
+      color: #91877d;
+      font-size: .78rem;
+      line-height: 1.5;
+    }
+    .text-answer {
+      display: block;
+      width: 100%;
+      min-height: 78px;
+      margin-top: 12px;
+      padding: 13px 14px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: #fffefa;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .text-answer::placeholder { color: #a39a91; }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 27px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+    .nav-button {
+      min-height: 46px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background .17s, transform .17s;
+    }
+    .nav-button:hover { transform: translateY(-1px); background: #f8f2eb; }
+    .nav-button.primary {
+      min-width: 142px;
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+      font-weight: 650;
+    }
+    .nav-button.primary:hover { border-color: var(--accent-dark); background: var(--accent-dark); }
+    .nav-button:disabled { opacity: .43; cursor: not-allowed; transform: none; }
+
+    .footer {
+      max-width: 480px;
+      margin: 17px auto 0;
+      color: #8c847a;
+      font-size: .78rem;
+      line-height: 1.65;
+      text-align: center;
+    }
+    .footer span { color: var(--accent); }
+
+    .welcome { padding: 36px clamp(23px, 7vw, 50px) 32px; text-align: center; }
+    .welcome-icon {
+      display: grid;
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 19px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 1.35rem;
+    }
+    .welcome h2 { margin-bottom: 12px; font-size: clamp(1.8rem, 6vw, 2.4rem); }
+    .welcome p { max-width: 450px; margin: 0 auto 22px; color: var(--muted); line-height: 1.75; }
+    .welcome .nav-button { min-width: 190px; }
+
+    .results { padding: 30px; }
+    .results h2 { margin: 6px 0 10px; text-align: center; }
+    .results-intro { margin: 0 auto 22px; max-width: 460px; color: var(--muted); line-height: 1.7; text-align: center; }
+    .answer-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .answer-item { padding: 14px 15px; border: 1px solid var(--line); border-radius: 12px; background: #fffefa; }
+    .answer-question { display: block; margin-bottom: 5px; color: var(--accent-dark); font-size: .73rem; font-weight: 700; letter-spacing: .035em; }
+    .answer-value { color: var(--ink); font-size: .91rem; line-height: 1.55; overflow-wrap: anywhere; }
+    .closing {
+      margin: 22px 0 0;
+      padding: 18px;
+      border-radius: 13px;
+      background: #f5efe7;
+      color: #61594f;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.08rem;
+      line-height: 1.65;
+      text-align: center;
+    }
+    .results .nav { justify-content: center; }
+    .results .nav-button { min-width: 185px; }
+    .hidden { display: none !important; }
+    .fade { animation: fade .24s ease both; }
+
+    @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fade { from { opacity: .35; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 500px) {
+      body { padding: 27px 13px; }
+      .intro { margin-bottom: 23px; font-size: .94rem; }
+      .card { border-radius: 19px; }
+      .progress-wrap { padding: 20px 20px 0; }
+      .quiz-body { min-height: 0; padding: 24px 20px 21px; }
+      .options { grid-template-columns: 1fr; gap: 8px; }
+      .option { min-height: 49px; padding: 12px 13px; }
+      .nav { margin-top: 22px; }
+      .nav-button { padding: 0 13px; }
+      .nav-button.primary { min-width: 132px; }
+      .results { padding: 24px 19px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <p class="topline">uma conversa especial</p>
+    <h1>Oi, Lívia.</h1>
+    <p class="intro">Fiz umas perguntinhas pra conhecer melhor seus sonhos, seus planos e as coisas que fazem seu coração feliz.</p>
+
+    <section class="card" aria-label="Perguntas para a Lívia">
+      <div id="welcome" class="welcome">
+        <span class="welcome-icon" aria-hidden="true">✦</span>
+        <h2>Posso te conhecer um pouquinho melhor?</h2>
+        <p>É só um questionário leve, no seu tempo. Responda o que quiser — você pode pular qualquer pergunta, e suas respostas ficam só nesta página.</p>
+        <button id="start-button" class="nav-button primary" type="button">Vamos conversar <span aria-hidden="true">→</span></button>
+      </div>
+
+      <div id="quiz" class="hidden">
+        <div class="progress-wrap">
+          <div class="progress-meta"><span id="step-label">Pergunta 1 de 7</span><strong id="percent-label">14%</strong></div>
+          <div class="progress-track" role="progressbar" aria-label="Progresso das perguntas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="14">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+        </div>
+        <div class="quiz-body" id="quiz-body" aria-live="polite">
+          <p class="question-kicker" id="question-kicker"></p>
+          <h2 id="question-title"></h2>
+          <p class="hint" id="question-hint"></p>
+          <div class="options" id="options" role="group"></div>
+          <label class="optional-note" for="answer-note">Quer contar mais? (opcional)</label>
+          <textarea class="text-answer" id="answer-note" maxlength="300" placeholder="Escreva do seu jeito..."></textarea>
+          <div class="nav">
+            <button id="back-button" class="nav-button" type="button">← Voltar</button>
+            <button id="skip-button" class="nav-button" type="button">Pular</button>
+            <button id="next-button" class="nav-button primary" type="button">Próxima →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="results" class="results hidden">
+        <p class="question-kicker" style="text-align:center">um retrato dos seus sonhos</p>
+        <h2>Obrigado por me contar, Lívia.</h2>
+        <p class="results-intro">Adorei conhecer um pouco mais do que você deseja pra vida e do que faz sentido pra você.</p>
+        <ul class="answer-list" id="answer-list"></ul>
+        <p class="closing">Quero continuar te conhecendo, sem pressa e do jeito que for confortável pra você. ♡</p>
+        <div class="nav"><button id="restart-button" class="nav-button" type="button">Ver as perguntas de novo</button></div>
+      </div>
+    </section>
+    <p class="footer">Sem respostas certas, sem cobrança. <span>♡</span> Você escolhe o que quer compartilhar.</p>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        kicker: "seus sonhos",
+        title: "O que você mais sonha em viver nos próximos anos?",
+        hint: "Pode ser um plano grande ou uma coisa simples que te deixaria feliz.",
+        options: ["Conhecer lugares novos", "Realizar um sonho profissional", "Viver com mais tranquilidade", "Me surpreender pelo caminho"]
+      },
+      {
+        kicker: "um lugar no mundo",
+        title: "Se pudesse acordar amanhã em qualquer lugar, onde seria?",
+        hint: "Vale uma cidade, uma praia, uma cabana ou até o seu cantinho favorito.",
+        options: ["Perto do mar", "Uma cidade que nunca conheci", "No campo, bem tranquila", "Em casa, com quem eu amo"]
+      },
+      {
+        kicker: "o que importa",
+        title: "O que não pode faltar na vida que você quer construir?",
+        hint: "Escolha o que mais combina com você neste momento.",
+        options: ["Família e pessoas queridas", "Liberdade e novas experiências", "Amor leve e companheirismo", "Paz, saúde e equilíbrio"]
+      },
+      {
+        kicker: "seu dia perfeito",
+        title: "Como seria um dia simples, mas perfeito pra você?",
+        hint: "Aquele tipo de dia que termina com você pensando: “eu precisava disso”.",
+        options: ["Passeio e uma aventura", "Comida boa e boas conversas", "Filme, aconchego e descanso", "Uma surpresa feita com carinho"]
+      },
+      {
+        kicker: "carinho de verdade",
+        title: "O que faz você se sentir querida por alguém?",
+        hint: "Cada pessoa demonstra carinho de um jeito diferente.",
+        options: ["Atenção e tempo juntos", "Palavras sinceras", "Pequenos gestos no dia a dia", "Respeito ao meu espaço e aos meus planos"]
+      },
+      {
+        kicker: "um pedido especial",
+        title: "Se um dia quisesse namorar, como imaginaria receber um pedido?",
+        hint: "Sem pressão — só curiosidade sobre o que seria especial pra você.",
+        options: ["Um momento simples, só nós dois", "Uma cartinha ou algo feito à mão", "Um encontro surpresa e romântico", "Prefiro algo espontâneo, sem planejar"]
+      },
+      {
+        kicker: "uma última curiosidade · opcional",
+        title: "E se alguém especial te chamasse pra sair, o que você acharia legal?",
+        hint: "Pode escolher uma opção, escrever outra ou simplesmente pular. Não existe resposta esperada.",
+        options: ["Um café e uma conversa", "Um passeio diferente", "Algo tranquilo, sem muita produção", "Prefiro decidir na hora"]
+      }
+    ];
+
+    const answers = Array(questions.length).fill(null);
+    let current = 0;
+    const welcome = document.getElementById("welcome");
+    const quiz = document.getElementById("quiz");
+    const results = document.getElementById("results");
+    const optionsElement = document.getElementById("options");
+    const noteElement = document.getElementById("answer-note");
+
+    function renderQuestion() {
+      const question = questions[current];
+      document.getElementById("step-label").textContent = `Pergunta ${current + 1} de ${questions.length}`;
+      const progress = Math.round(((current + 1) / questions.length) * 100);
+      document.getElementById("percent-label").textContent = `${progress}%`;
+      document.querySelector(".progress-track").setAttribute("aria-valuenow", progress);
+      document.getElementById("progress-bar").style.width = `${progress}%`;
+      document.getElementById("question-kicker").textContent = question.kicker;
+      document.getElementById("question-title").textContent = question.title;
+      document.getElementById("question-hint").textContent = question.hint;
+      optionsElement.setAttribute("aria-label", question.title);
+      optionsElement.replaceChildren();
+
+      question.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.className = "option";
+        button.type = "button";
+        button.textContent = option;
+        button.setAttribute("aria-pressed", String(answers[current]?.choice === index));
+        button.addEventListener("click", () => {
+          answers[current] = { choice: index, note: noteElement.value.trim() };
+          optionsElement.querySelectorAll(".option").forEach((item, itemIndex) => {
+            item.setAttribute("aria-pressed", String(itemIndex === index));
+          });
+        });
+        optionsElement.append(button);
+      });
+
+      const answer = answers[current];
+      noteElement.value = answer?.note || "";
+      document.getElementById("back-button").disabled = current === 0;
+      document.getElementById("next-button").textContent = current === questions.length - 1 ? "Ver mensagem →" : "Próxima →";
+      document.getElementById("quiz-body").classList.remove("fade");
+      void document.getElementById("quiz-body").offsetWidth;
+      document.getElementById("quiz-body").classList.add("fade");
+    }
+
+    function saveCurrentNote() {
+      const note = noteElement.value.trim();
+      if (answers[current]) answers[current].note = note;
+      else if (note) answers[current] = { note };
+    }
+
+    function goNext() {
+      saveCurrentNote();
+      if (current === questions.length - 1) {
+        showResults();
+        return;
+      }
+      current++;
+      renderQuestion();
+    }
+
+    function showResults() {
+      saveCurrentNote();
+      const list = document.getElementById("answer-list");
+      list.replaceChildren();
+      questions.forEach((question, index) => {
+        const answer = answers[index];
+        if (!answer) return;
+        const item = document.createElement("li");
+        item.className = "answer-item";
+        const prompt = document.createElement("span");
+        prompt.className = "answer-question";
+        prompt.textContent = question.title;
+        const response = document.createElement("span");
+        response.className = "answer-value";
+        const parts = [];
+        if (answer.choice !== undefined) parts.push(question.options[answer.choice]);
+        if (answer.note) parts.push(answer.note);
+        response.textContent = parts.join(" — ");
+        item.append(prompt, response);
+        list.append(item);
+      });
+      quiz.classList.add("hidden");
+      results.classList.remove("hidden");
+      document.getElementById("percent-label").textContent = "100%";
+      results.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    document.getElementById("start-button").addEventListener("click", () => {
+      welcome.classList.add("hidden");
+      quiz.classList.remove("hidden");
+      renderQuestion();
+    });
+    document.getElementById("back-button").addEventListener("click", () => {
+      if (current === 0) return;
+      saveCurrentNote();
+      current--;
+      renderQuestion();
+    });
+    document.getElementById("skip-button").addEventListener("click", () => {
+      answers[current] = null;
+      noteElement.value = "";
+      goNext();
+    });
+    document.getElementById("next-button").addEventListener("click", goNext);
+    noteElement.addEventListener("input", () => {
+      if (answers[current]) answers[current].note = noteElement.value.trim();
+    });
+    document.getElementById("restart-button").addEventListener("click", () => {
+      current = 0;
+      answers.fill(null);
+      noteElement.value = "";
+      results.classList.add("hidden");
+      welcome.classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
